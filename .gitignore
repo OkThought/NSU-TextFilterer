@@ -1,0 +1,9 @@
+# input, output directories
+input/
+output/
+
+# other possibly input or output file extensions
+*.txt
+*.pdf
+*.html
+*.zip
