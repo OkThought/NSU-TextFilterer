@@ -2,10 +2,8 @@ import re
 import shutil
 import tempfile
 
-import mmap
-
 formula_regexp_str = r'(?:[()\w\d]*\s*[\^\-+=<>≤≥*\/|])+\s*[()\w\d]*'
-formula_sentence_regexp_str = r'[^.!?\n\r]*' + formula_regexp_str + r'+\s*[()\w\d]*[^.!?\n\r]*\s*'
+formula_sentence_regexp_str = r'[^.!?\n\r]*' + formula_regexp_str + r'[^.!?\n\r]*\s*'
 
 formula_regexp = re.compile(formula_regexp_str)
 formula_sentence_regexp = re.compile(formula_sentence_regexp_str)
