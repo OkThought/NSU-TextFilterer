@@ -16,6 +16,8 @@ class TestTextFilter(unittest.TestCase):
         self.assertTrue(is_formula("a>=b"))
         self.assertTrue(is_formula("a<=b"))
         self.assertTrue(is_formula("a=b"))
+
+    def test_is_formula_complex(self):
         self.assertTrue(is_formula("f(x)=ax+b"))
         self.assertTrue(is_formula("f (x, a, b, c) = a x^2 + b x + c"))
 
