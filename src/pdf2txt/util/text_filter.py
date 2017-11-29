@@ -2,7 +2,7 @@ import re
 import shutil
 import tempfile
 
-formula_regexp_str = r'(?:[()\w\d]*\s*[\^\-+=<>≤≥*\/|])+\s*[()\w\d]*'
+formula_regexp_str = r'(?:\s*[()\w\d, ]*\s*[\^\-+=<>≤≥*\/|])+\s*[,()\w\d]*'
 formula_sentence_regexp_str = r'[^.!?\n\r]*' + formula_regexp_str + r'[^.!?\n\r]*\s*'
 
 formula_regexp = re.compile(formula_regexp_str)
