@@ -1,6 +1,6 @@
 import unittest
 
-from pdf2txt.util.text_filter import is_formula, is_formula_sentence
+from pdf2txt.util.text_filter import is_formula, is_formula_sentence, filter_symbols
 
 
 class TestTextFilter(unittest.TestCase):
@@ -50,6 +50,8 @@ class TestTextFilter(unittest.TestCase):
                         repr(formula_sentence)
                         self.assertTrue(is_formula_sentence(formula_sentence), formula_sentence)
 
+    def test_filter_symbols(self):
+        self.assertEqual('some text', filter_symbols('s!o@m#e$ %t^e&x*t()_+-', '!@#$%^&*()_+-'))
 
 if __name__ == '__main__':
     unittest.main()
