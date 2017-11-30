@@ -1,6 +1,6 @@
 import unittest
 
-from pdf2txt.util.text_filter import is_formula, is_formula_sentence, filter_symbols
+from pdf2txt.util.text_filter import is_formula, is_formula_sentence, filter_symbols, filter_text
 
 
 class TestTextFilter(unittest.TestCase):
@@ -52,6 +52,16 @@ class TestTextFilter(unittest.TestCase):
 
     def test_filter_symbols(self):
         self.assertEqual('some text', filter_symbols('s!o@m#e$ %t^e&x*t()_+-', '!@#$%^&*()_+-'))
+
+    def test_filter_text(self):
+        self.assertEqual('', filter_text('First Axiom of Trigonometry: syn^2(x) + cos^2(x) = 1', filter_formulas=True))
+        line = 'Clear text without special symbols like '
+        garbage = '!@#$%^&*()'
+        line_with_garbage = line + garbage
+        self.assertEqual(line, filter_text(line_with_garbage,
+                                           filter_formulas=False,
+                                           symbols_to_filter=garbage))
+
 
 if __name__ == '__main__':
     unittest.main()
