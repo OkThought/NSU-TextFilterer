@@ -33,6 +33,13 @@ def filter_symbols(text: str, symbols: Iterable):
     return ''.join(char for char in text if char not in symbols)
 
 
+def filter_text(text: str, filter_formulas=True, symbols_to_filter=''):
+    if filter_formulas and contains_formula(text):
+        return ''
+    if symbols_to_filter:
+        return filter_symbols(text, symbols_to_filter)
+
+
 def filter_file(filename: str, filter_formulas=True, symbols_to_filter=''):
     with tempfile.TemporaryFile() as tmp_fp:
         with open(filename, 'w+') as f:
@@ -40,9 +47,7 @@ def filter_file(filename: str, filter_formulas=True, symbols_to_filter=''):
             f.seek(0)
             f.truncate()
             for line in tmp_fp:
-                if filter_formulas and contains_formula(line):
-                    continue
-                if symbols_to_filter:
-                    filter_symbols(line, symbols_to_filter)
-
+                line = filter_text(text=line, filter_formulas=filter_formulas, symbols_to_filter=symbols_to_filter)
+                if line:
+                    f.write(line)
 
