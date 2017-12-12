@@ -36,7 +36,7 @@ class TestTextFilter(unittest.TestCase):
         line = 'Clear text without special symbols like '
         garbage = '!@#$%^&*()'
         line_with_garbage = line + garbage
-        self.assertEqual(line, self.text_filterer.filter_text(line_with_garbage))
+        self.assertEqual(line, TextFilterer(chars_to_skip=garbage, filter_formulas=False).filter_text(line_with_garbage))
 
 
 if __name__ == '__main__':
