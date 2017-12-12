@@ -1,6 +1,6 @@
 import unittest
 
-from pdf2txt.util.text_filter import is_formula, is_formula_sentence, filter_symbols, filter_text
+from pdf2txt.util.text_filter import TextFilterer
 
 
 class TestTextFilter(unittest.TestCase):
@@ -14,53 +14,29 @@ class TestTextFilter(unittest.TestCase):
         # self.sentences = [phrase + ending for phrase in self.phrases for ending in self.sentence_endings]
         self.sentences = []
         self.possible_text_formula_separators = [': ', ':', ' ', '\t', ',']
+        self.text_filterer = TextFilterer()
 
     def test_is_formula_empty(self):
         for empty_formula in self.empty_formulas:
-            self.assertFalse(is_formula(empty_formula))
+            self.assertFalse(self.text_filterer.is_formula(empty_formula))
 
     def test_is_formula(self):
         for formula in self.simple_formulas:
-            self.assertTrue(is_formula(formula))
+            self.assertTrue(self.text_filterer.is_formula(formula))
 
     def test_is_formula_complex(self):
         for formula in self.complex_formulas:
-            self.assertTrue(is_formula(formula))
-
-    @unittest.skip
-    def test_is_formula_sentence_empty(self):
-        for empty_formula in self.empty_formulas:
-            self.assertFalse(is_formula_sentence(empty_formula))
-
-    @unittest.skip
-    def test_is_formula_sentence_on_formulas(self):
-        for formula in self.simple_formulas + self.complex_formulas:
-            self.assertTrue(is_formula_sentence(formula))
-
-    @unittest.skip
-    def test_is_formula_sentence(self):
-        for sentence in self.sentences:
-            self.assertFalse(is_formula_sentence(sentence))
-
-        for phrase in self.phrases:
-            for formula in self.simple_formulas + self.complex_formulas:
-                for separator in self.possible_text_formula_separators:
-                    for ending in self.sentence_endings:
-                        formula_sentence = phrase + separator + formula + ending
-                        repr(formula_sentence)
-                        self.assertTrue(is_formula_sentence(formula_sentence), formula_sentence)
+            self.assertTrue(self.text_filterer.is_formula(formula))
 
     def test_filter_symbols(self):
-        self.assertEqual('some text', filter_symbols('s!o@m#e$ %t^e&x*t()_+-', '!@#$%^&*()_+-'))
+        self.assertEqual('some text', self.text_filterer.filter_chars('s!o@m#e$ %t^e&x*t()_+-', '!@#$%^&*()_+-'))
 
     def test_filter_text(self):
-        self.assertEqual('', filter_text('First Axiom of Trigonometry: syn^2(x) + cos^2(x) = 1', filter_formulas=True))
+        self.assertEqual('', self.text_filterer.filter_text('First Axiom of Trigonometry: syn^2(x) + cos^2(x) = 1'))
         line = 'Clear text without special symbols like '
         garbage = '!@#$%^&*()'
         line_with_garbage = line + garbage
-        self.assertEqual(line, filter_text(line_with_garbage,
-                                           filter_formulas=False,
-                                           symbols_to_filter=garbage))
+        self.assertEqual(line, self.text_filterer.filter_text(line_with_garbage))
 
 
 if __name__ == '__main__':

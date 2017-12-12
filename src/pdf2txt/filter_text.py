@@ -4,14 +4,18 @@ import fileinput
 import string
 import sys
 
-from util.text_filter import filter_text
+# from util.text_filter import TextFilterer
+from util.text_filter import TextFilterer
 
-symbols_to_filter = string.digits + string.punctuation
+chars_to_skip = string.digits + string.punctuation
 
 
 def main(args=None):
-    for line in fileinput.input():
-        print(filter_text(line, filter_formulas=True, symbols_to_filter=symbols_to_filter))
+    file_filterer = TextFilterer(filter_formulas=True, chars_to_skip=chars_to_skip)
+    if len(args) == 3:
+        file_filterer.filter(args[1], args[2])
+    else:
+        file_filterer.filter(args[1])
 
 
 if __name__ == '__main__':
