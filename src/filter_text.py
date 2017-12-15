@@ -25,12 +25,10 @@ def main(args=None):
     if a.dst and a.dst == a.src or a.src and not a.dst:
         import os
         dir_path, name = os.path.split(a.src)
-        if dir_path and dir_path[-1] != os.pathsep:
-            dir_path += os.pathsep
         name, extension = os.path.splitext(name)
-        a.dst = '%s%s-filtered%s' % (dir, name, extension)
+        name = '%s-filtered%s' % (name, extension)
+        a.dst = os.path.join(dir_path, name)
 
-    print(a)
     with open(a.src, 'r') if a.src else sys.stdin as src, open(a.dst, 'w') if a.dst else sys.stdout as dst:
         if not a.no_mmap:
             import mmap
