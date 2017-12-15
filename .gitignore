@@ -7,3 +7,6 @@ output/
 *.pdf
 *.html
 *.zip
+
+# idea files
+.idea/
