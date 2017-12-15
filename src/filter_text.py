@@ -38,9 +38,8 @@ def main(args=None):
             dst = mmap.mmap(fileno=dst.fileno(), length=0)
         file_filterer = TextFilterer(src, dst,
                                      filter_sentences_with_formulas=not a.keep_formulas,
-                                     chars_to_skip=a.skip_chars,
-                                     )
-        file_filterer.filter(src, dst)
+                                     chars_to_skip=a.skip_chars,)
+        file_filterer.filter()
 
 
 if __name__ == '__main__':

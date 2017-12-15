@@ -1,10 +1,8 @@
+import os
 import re
 import shutil
 import tempfile
-
-from collections import Iterable, Iterator
-
-import os
+from collections import Iterable
 
 
 def create_temporary_copy(src):
@@ -18,7 +16,7 @@ def remove_temporary_copy(temp_path):
     os.remove(temp_path)
 
 
-class TextFilterer (Iterator):
+class TextFilterer:
 
     def __init__(self, src, dst, filter_sentences_with_formulas=True, chars_to_skip: Iterable = '', use_regex=False,
                  sentence_delimiters=None):
@@ -39,7 +37,9 @@ class TextFilterer (Iterator):
         return self.formula_regexp.fullmatch(text) is not None
 
     def contains_formula(self, text: str):
-        return self.formula_regexp.search(text) is not None
+        if self.use_regex:
+            return self.formula_regexp.search(text) is not None
+        # TODO: implement non-regex
 
     def find_formula(self, text: str):
         match = self.formula_regexp.search(text)
@@ -50,16 +50,11 @@ class TextFilterer (Iterator):
         return ''.join(char for char in text if char not in restricted_chars)
 
     def filter_text(self, text: str):
+        if text is None: return None
         if self.filter_sentences_with_formulas and self.contains_formula(text):
             return ''
         if self.chars_to_skip:
             return self.filter_chars(text, self.chars_to_skip)
-
-    def filter_regex(self, src, dst):
-        for line in src:
-            line = self.filter_text(text=line)
-            if line:
-                dst.write(line)
 
     def find_one_of(self, values, direction=1):
         if not values:
@@ -72,24 +67,28 @@ class TextFilterer (Iterator):
             pos += direction
         return pos
 
-    def filter_mmap(self, src, dst):
-        self.pos = 0
-
-
-
-
-    def filter(self, src, dst):
+    def filter(self):
         if self.use_regex:
-            self.filter_regex(src, dst)
-        else:
-            self.filter_mmap(src, dst)
+            for line in self.src:
+                line = self.filter_text(text=line)
+                if line:
+                    self.dst.write(line)
+            return
+        for sentence in self:
+            self.dst.write(sentence)
 
     def next_sentence(self):
-        if self.use_regex: return None
+        if self.use_regex: return self.src.readLine()
+        # TODO: implement
 
+    def __iter__(self):
+        self.pos = 0
+        self.sentence_start = 0
+        self.sentence_end = -1
+        return self
 
     def __next__(self):
-        return self.next_sentence()
+        return self.filter_text(self.next_sentence())
 
 
 
