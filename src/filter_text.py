@@ -29,7 +29,8 @@ def main(args=None):
         name = '%s-filtered%s' % (name, extension)
         a.dst = os.path.join(dir_path, name)
 
-    with open(a.src, 'r') if a.src else sys.stdin as src, open(a.dst, 'w') if a.dst else sys.stdout as dst:
+    with    open(a.src, 'r') if a.src else sys.stdin as src, \
+            open(a.dst, 'w') if a.dst else sys.stdout as dst:
         if not a.no_mmap:
             import mmap
             src = mmap.mmap(fileno=src.fileno(), length=0)
