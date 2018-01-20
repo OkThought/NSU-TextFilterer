@@ -31,9 +31,9 @@ def main(args=None):
         # src file is empty
         return
 
-    with    open(a.src, 'r') if a.src else sys.stdin as _in, \
-            open(a.dst, 'w') if a.dst else sys.stdout as _out:
-        file_filterer = TextFilterer(_in, _out,
+    with    open(a.src, 'r') if a.src else sys.stdin as src, \
+            open(a.dst, 'w') if a.dst else sys.stdout as dst:
+        file_filterer = TextFilterer(src, dst,
             remove_sentences_with_formulas=not a.keep_sentences_with_formulas,
             chars_to_skip=a.skip_chars, sentence_delimiters=a.sentence_delimiters)
         file_filterer.filter()
