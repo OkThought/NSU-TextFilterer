@@ -2,7 +2,6 @@ import os
 import re
 import shutil
 from collections import Sequence
-from io import TextIOWrapper, BufferedReader, BufferedWriter
 
 
 def create_temporary_copy(src):
@@ -27,19 +26,17 @@ class TextFilterer:
         '`': '`',
     }
 
-    def __init__(self, _in, _out, remove_sentences_with_formulas=True, chars_to_skip: Sequence = '',
+    def __init__(self, src, dst, remove_sentences_with_formulas=True, chars_to_skip: Sequence = '',
                  sentence_delimiters=None):
-        self.reader = TextIOWrapper(BufferedReader(_in))
-        self.writer = TextIOWrapper(BufferedWriter(_out))
-        self.buf = ''
+        self.reader = src
+        self.writer = dst
         self.remove_sentences_with_formulas = remove_sentences_with_formulas
         self.chars_to_skip = chars_to_skip
         self.trans_table = str.maketrans(dict.fromkeys(chars_to_skip))
         self.formula_regexp_str = r'(?:\s*[()\w\d, ]*\s*[\^\-+=<>≤≥*\/|])+\s*[,()\w\d]*'
         self.formula_regexp = re.compile(self.formula_regexp_str)
         self.sentence_delimiters = sentence_delimiters if sentence_delimiters else ['.']
-        self.sentence_start = 0
-        self.sentence_end = -1
+        self.eof = False
 
     def is_formula(self, text: str):
         return self.formula_regexp.fullmatch(text) is not None
@@ -62,35 +59,40 @@ class TextFilterer:
         if self.chars_to_skip:
             return self.filter_chars(sentence)
 
-    def find_sentence_ending(self, escape_sequence_map=None):
+    def filter(self):
+        for sentence in self:
+            self.writer.write(sentence)
+
+    def read_sentence(self, escape_sequence_map=None):
         if escape_sequence_map is None:
             escape_sequence_map = TextFilterer.DEFAULT_ESCAPE_SEQUENCE_MAP
+        sentence = ''
         escape = []
         while True:
             c = self.reader.read(1)
-            if not c:  # eof
-                break
-            self.pos += 1
+            if not c:
+                # eof
+                self.eof = True
+                return sentence
             if c in self.sentence_delimiters and not escape:
-                return self.pos
+                sentence += c  # keep delimiter in sentence
+                return sentence
             if c in escape_sequence_map.keys():
                 if escape and escape_sequence_map[c] == escape[-1]:
                     escape.pop()
                 else:
                     escape.append(c)
-            elif escape and escape[-1] == escape_sequence_map[c]:
+            elif escape and (escape[-1], c) in escape_sequence_map:
                 escape.pop()
-
-    def filter(self):
-        for sentence in self:
-            self.writer.write(sentence)
+            sentence += c
 
     def next_sentence(self):
-        self.sentence_start = self.sentence_end + 1
-        self.sentence_end = self.find_sentence_ending()
-        if self.sentence_end == -1:
+        if self.eof:
             raise StopIteration
-        return self.buf[self.sentence_start:self.sentence_end]
+        sentence = self.read_sentence()
+        if sentence is None:
+            raise StopIteration
+        return sentence
 
     def __iter__(self):
         self.pos = -1
