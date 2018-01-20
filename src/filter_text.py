@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import string
 import sys
+import os
 
-from util.text_filter import TextFilterer
+from util.filter_text import TextFilterer
 
 
 def main(args=None):
@@ -12,9 +13,7 @@ def main(args=None):
                    help='file to filter. By default `stdin`')
     p.add_argument('dst', nargs='?', default=None,
                    help='filtered file. By default `stdout` or if src defined')
-    p.add_argument('--no-mmap', default=True, action='store_false',
-                   help='disable mmap for the files')
-    p.add_argument('--keep-formulas', default=False, action='store_true',
+    p.add_argument('--keep-sentences-with-formulas', default=False, action='store_true',
                    help='when specified does not filter sentences with formulas')
     p.add_argument('--sentence-delimiters', default=['.'], nargs='*', metavar='char',
                    help='characters indicating sentence endings and beginnings')
@@ -23,21 +22,20 @@ def main(args=None):
     a = p.parse_args(args)
 
     if a.dst and a.dst == a.src or a.src and not a.dst:
-        import os
         dir_path, name = os.path.split(a.src)
         name, extension = os.path.splitext(name)
         name = '%s-filtered%s' % (name, extension)
         a.dst = os.path.join(dir_path, name)
 
-    with    open(a.src, 'r') if a.src else sys.stdin as src, \
-            open(a.dst, 'w') if a.dst else sys.stdout as dst:
-        if not a.no_mmap:
-            import mmap
-            src = mmap.mmap(fileno=src.fileno(), length=0)
-            dst = mmap.mmap(fileno=dst.fileno(), length=0)
-        file_filterer = TextFilterer(src, dst,
-                                     filter_sentences_with_formulas=not a.keep_formulas,
-                                     chars_to_skip=a.skip_chars,)
+    if os.stat(a.src).st_size == 0:
+        # src file is empty
+        return
+
+    with    open(a.src, 'r') if a.src else sys.stdin as _in, \
+            open(a.dst, 'w') if a.dst else sys.stdout as _out:
+        file_filterer = TextFilterer(_in, _out,
+            remove_sentences_with_formulas=not a.keep_sentences_with_formulas,
+            chars_to_skip=a.skip_chars, sentence_delimiters=a.sentence_delimiters)
         file_filterer.filter()
 
 
