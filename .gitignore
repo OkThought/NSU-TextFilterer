@@ -1,7 +1,3 @@
-# input, output directories
-input/
-output/
-
 # other possibly input or output file extensions
 *.txt
 *.pdf
@@ -10,3 +6,7 @@ output/
 
 # idea files
 .idea/
+
+# un-ignore test cases
+!test/cases/expected/*
+!test/cases/input/*
