@@ -1,42 +1,34 @@
+import filecmp
 import unittest
 
-from pdf2txt.util.text_filter import TextFilterer
+import os
+
+import filter_text
 
 
-class TestTextFilter(unittest.TestCase):
+class TestFilterText(unittest.TestCase):
+    test_files_dir = 'cases/input'
+    expected_files_dir = 'cases/expected'
+    result_files_dir = 'cases/output'
+
     def setUp(self):
-        self.empty_formulas = ['', ' ', '    ', '\t', '\n', '\r', '\n\n', '\n\r\t\t\r\n']
-        self.simple_formulas = ['a+b', 'a-b', 'a*b', 'a/b', 'a>b', 'a<b', 'a≥b', 'a≤b', 'a>=b', 'a<=b', 'a=b']
-        self.complex_formulas = ['f(x)=ax+b', 'f (x, a, b, c) = a x^2 + b x + c', '-a+b']
-        # self.sentence_endings = ['.', '!', '?', r'\n', r'\n\r', r'\r']
-        self.sentence_endings = []
-        self.phrases = ['Some text', 'Word', 'word', 'And he said: \"Stop it!\"', 'this was k to the power of n']
-        # self.sentences = [phrase + ending for phrase in self.phrases for ending in self.sentence_endings]
-        self.sentences = []
-        self.possible_text_formula_separators = [': ', ':', ' ', '\t', ',']
-        self.text_filterer = TextFilterer()
+        # print(os.listdir("cases"))
+        if not os.path.isdir(TestFilterText.result_files_dir):
+            os.mkdir(TestFilterText.result_files_dir)
 
-    def test_is_formula_empty(self):
-        for empty_formula in self.empty_formulas:
-            self.assertFalse(self.text_filterer.is_formula(empty_formula))
+    def test_on_files(self):
+        test_file_names = os.listdir(TestFilterText.test_files_dir)
+        for test_file_name in test_file_names:
+            t = os.path.join(self.test_files_dir, test_file_name)
+            r = os.path.join(self.result_files_dir, test_file_name)
+            e = os.path.join(self.expected_files_dir, test_file_name)
 
-    def test_is_formula(self):
-        for formula in self.simple_formulas:
-            self.assertTrue(self.text_filterer.is_formula(formula))
+            filter_text.main([t, r])
+            self.assertTrue(filecmp.cmp(r, e, shallow=False), t + " ≠ " + e)
 
-    def test_is_formula_complex(self):
-        for formula in self.complex_formulas:
-            self.assertTrue(self.text_filterer.is_formula(formula))
-
-    def test_filter_symbols(self):
-        self.assertEqual('some text', self.text_filterer.filter_chars('s!o@m#e$ %t^e&x*t()_+-', '!@#$%^&*()_+-'))
-
-    def test_filter_text(self):
-        self.assertEqual('', self.text_filterer.filter_text('First Axiom of Trigonometry: syn^2(x) + cos^2(x) = 1'))
-        line = 'Clear text without special symbols like '
-        garbage = '!@#$%^&*()'
-        line_with_garbage = line + garbage
-        self.assertEqual(line, TextFilterer(chars_to_skip=garbage, filter_formulas=False).filter_text(line_with_garbage))
+    def tearDown(self):
+        if not os.path.isdir(TestFilterText.result_files_dir):
+            os.rmdir(TestFilterText.result_files_dir)
 
 
 if __name__ == '__main__':
