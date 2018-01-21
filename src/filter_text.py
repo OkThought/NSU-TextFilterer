@@ -15,9 +15,11 @@ def main(args=None):
                    help='filtered file. By default `stdout` or if src defined')
     p.add_argument('--keep-sentences-with-formulas', default=False, action='store_true',
                    help='when specified does not filter sentences with formulas')
-    p.add_argument('--sentence-delimiters', default=['.'], nargs='*', metavar='char',
+    default_sentence_delimiters = '.!?'
+    p.add_argument('--sentence-delimiters', default=default_sentence_delimiters, nargs='*', metavar='char',
                    help='characters indicating sentence endings and beginnings')
-    p.add_argument('--skip-chars', default=string.punctuation, nargs='*', metavar='char',
+    default_skip_chars = string.punctuation.translate({ord(c): None for c in default_sentence_delimiters + ','})
+    p.add_argument('--skip-chars', default=default_skip_chars, nargs='*', metavar='char',
                    help='characters not written to dst')
     a = p.parse_args(args)
 
@@ -33,9 +35,12 @@ def main(args=None):
 
     with    open(a.src, 'r') if a.src else sys.stdin as src, \
             open(a.dst, 'w') if a.dst else sys.stdout as dst:
-        file_filterer = TextFilterer(src, dst,
+        file_filterer = TextFilterer(
+            src=src,
+            dst=dst,
             remove_sentences_with_formulas=not a.keep_sentences_with_formulas,
-            chars_to_skip=a.skip_chars, sentence_delimiters=a.sentence_delimiters)
+            chars_to_skip=a.skip_chars,
+            sentence_delimiters=a.sentence_delimiters)
         file_filterer.filter()
 
 
