@@ -1,7 +1,7 @@
 import os
 import re
 import shutil
-from collections import Sequence
+import string
 
 
 def create_temporary_copy(src):
@@ -20,22 +20,43 @@ class TextFilterer:
     DEFAULT_ESCAPE_SEQUENCE_MAP = {
         '"': '"',
         "'": "'",
+        "«": "»",
         '(': ')',
         '[': ']',
         '{': '}',
         '`': '`',
     }
 
-    def __init__(self, src, dst, remove_sentences_with_formulas=True, chars_to_skip: Sequence = '',
-                 sentence_delimiters=None):
+    DEFAULT_OPERATION_CHARS = r'\^\-+=<>≤≥*\/|'
+    DEFAULT_OPERAND_CHARS = string.ascii_letters + '_' + string.digits
+
+    def __init__(self, src, dst, sentence_delimiters=None, chars_to_remove: str=None,
+                 remove_sentences_with_formulas=True, formula_operation_chars: str=None,
+                 formula_operand_chars: str=None):
         self.reader = src
         self.writer = dst
-        self.remove_sentences_with_formulas = remove_sentences_with_formulas
-        self.chars_to_skip = chars_to_skip
-        self.trans_table = str.maketrans(dict.fromkeys(chars_to_skip))
-        self.formula_regexp_str = r'(?:\s*[()\w\d, ]*\s*[\^\-+=<>≤≥*\/|])+\s*[,()\w\d]*'
-        self.formula_regexp = re.compile(self.formula_regexp_str)
+
         self.sentence_delimiters = sentence_delimiters if sentence_delimiters else ['.']
+        self.chars_to_remove = chars_to_remove
+
+        self.filter_formulas = remove_sentences_with_formulas
+        if remove_sentences_with_formulas:
+
+            if formula_operand_chars is None:
+                formula_operand_chars = TextFilterer.DEFAULT_OPERAND_CHARS
+            self.operand_chars = formula_operand_chars
+
+            if formula_operation_chars is None:
+                formula_operation_chars = TextFilterer.DEFAULT_OPERATION_CHARS
+            self.operation_chars = formula_operation_chars
+
+            self.formula_regexp_str = r'(?:\s*[{operand}]+\s*[{operation}])+\s*[{operand}]+'.format(
+                operand=self.operand_chars,
+                operation=self.operation_chars)
+
+            self.formula_regexp = re.compile(self.formula_regexp_str)
+
+        self.sentence_contains_operation_chars = False
         self.eof = False
 
     def is_formula(self, text: str):
@@ -48,16 +69,12 @@ class TextFilterer:
         match = self.formula_regexp.search(text)
         return match.pos, match.endpos
 
-    def filter_chars(self, text: str):
-        return text.translate(self.trans_table)
-
     def filter_sentence(self, sentence: str):
         if sentence is None:
             return None
-        if self.remove_sentences_with_formulas and self.contains_formula(sentence):
+        if self.filter_formulas and self.sentence_contains_operation_chars and self.contains_formula(sentence):
             return ''
-        if self.chars_to_skip:
-            return self.filter_chars(sentence)
+        return sentence
 
     def filter(self):
         for sentence in self:
@@ -66,25 +83,31 @@ class TextFilterer:
     def read_sentence(self, escape_sequence_map=None):
         if escape_sequence_map is None:
             escape_sequence_map = TextFilterer.DEFAULT_ESCAPE_SEQUENCE_MAP
+        self.sentence_contains_operation_chars = False
         sentence = ''
         escape = []
         while True:
             c = self.reader.read(1)
+
             if not c:
                 # eof
                 self.eof = True
                 return sentence
+
+            if c in self.operation_chars:
+                self.sentence_contains_operation_chars = True
+
             if c in self.sentence_delimiters and not escape:
                 sentence += c  # keep delimiter in sentence
                 return sentence
-            if c in escape_sequence_map.keys():
-                if escape and escape_sequence_map[c] == escape[-1]:
-                    escape.pop()
-                else:
-                    escape.append(c)
-            elif escape and (escape[-1], c) in escape_sequence_map:
+
+            if escape and (escape[-1], c) in escape_sequence_map:
                 escape.pop()
-            sentence += c
+            elif c in escape_sequence_map.keys():
+                escape.append(c)
+
+            if not c in self.chars_to_remove:
+                sentence += c
 
     def next_sentence(self):
         if self.eof:
@@ -95,9 +118,6 @@ class TextFilterer:
         return sentence
 
     def __iter__(self):
-        self.pos = -1
-        self.sentence_start = 0
-        self.sentence_end = -1
         return self
 
     def __next__(self):
