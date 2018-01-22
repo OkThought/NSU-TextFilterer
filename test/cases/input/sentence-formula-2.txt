@@ -1,0 +1,1 @@
+There is a simple sentence. And there is a difficult one: a+b=c.
