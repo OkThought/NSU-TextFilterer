@@ -24,7 +24,7 @@ class TestFilterText(unittest.TestCase):
             e = os.path.join(self.expected_files_dir, test_file_name)
 
             filter_text.main([t, r])
-            self.assertTrue(filecmp.cmp(r, e, shallow=False), t + " ≠ " + e)
+            self.assertTrue(filecmp.cmp(r, e, shallow=False), r + " ≠ " + e)
 
     def tearDown(self):
         if not os.path.isdir(TestFilterText.result_files_dir):
