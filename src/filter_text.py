@@ -42,8 +42,11 @@ def main(args=None):
             open(a.dst, 'w').close()
         return
 
-    with    open(a.src, 'r') if a.src else sys.stdin as src, \
-            open(a.dst, 'w') if a.dst else sys.stdout as dst:
+    src = dst = None
+    try:
+        src = open(a.src, 'r') if a.src else sys.stdin
+        dst = open(a.dst, 'w') if a.dst else sys.stdout
+
         file_filterer = TextFilterer(
             src=src,
             dst=dst,
@@ -51,6 +54,11 @@ def main(args=None):
             remove_sentences_with_formulas=not a.keep_sentences_with_formulas,
             chars_to_remove=a.skip_chars)
         file_filterer.filter()
+    finally:
+        if src and src is not sys.stdin:
+            src.close()
+        if dst and dst is not sys.stdout:
+            dst.close()
 
 
 if __name__ == '__main__':
