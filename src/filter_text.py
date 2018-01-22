@@ -11,21 +11,24 @@ def main(args=None):
     p = argparse.ArgumentParser()
 
     p.add_argument('src', nargs='?', default=None,
-                   help='file to filter. By default `stdin`')
+                   help='file to filter. By default stdin.')
 
     p.add_argument('dst', nargs='?', default=None,
-                   help='filtered file. By default `stdout` or if src defined')
+                   help='filtered file. By default stdout or "<src_file_path>-filtered.<src_file_extension>" if src is '
+                        'specified.')
 
     default_sentence_delimiters = '.!?'
     p.add_argument('--sentence-delimiters', default=default_sentence_delimiters, nargs='*', metavar='char',
-                   help='characters indicating sentence endings and beginnings')
+                   help='characters indicating sentence endings and beginnings. '
+                        'By default: "{}"'.format(default_sentence_delimiters))
 
     p.add_argument('--keep-sentences-with-formulas', default=False, action='store_true',
-                   help='when specified does not filter sentences with formulas')
+                   help='when specified does not filter sentences with formulas.')
 
     default_skip_chars = r'#@$\\`'
     p.add_argument('--skip-chars', default=default_skip_chars, nargs='*', metavar='char',
-                   help='characters not written to dst')
+                   help='characters not written to dst. '
+                        'By default: "{}"'.format(default_skip_chars))
 
     a = p.parse_args(args)
 
@@ -35,7 +38,7 @@ def main(args=None):
         name = '%s-filtered%s' % (name, extension)
         a.dst = os.path.join(dir_path, name)
 
-    if os.stat(a.src).st_size == 0:
+    if a.src and os.stat(a.src).st_size == 0:
         # src file is empty
         # create empty dst file
         if a.dst:
