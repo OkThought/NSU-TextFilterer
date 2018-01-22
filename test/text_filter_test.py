@@ -3,6 +3,8 @@ import unittest
 
 import os
 
+import shutil
+
 import filter_text
 
 
@@ -27,8 +29,8 @@ class TestFilterText(unittest.TestCase):
             self.assertTrue(filecmp.cmp(r, e, shallow=False), r + " ≠ " + e)
 
     def tearDown(self):
-        if not os.path.isdir(TestFilterText.result_files_dir):
-            os.rmdir(TestFilterText.result_files_dir)
+        if os.path.isdir(TestFilterText.result_files_dir):
+            shutil.rmtree(TestFilterText.result_files_dir)
 
 
 if __name__ == '__main__':
