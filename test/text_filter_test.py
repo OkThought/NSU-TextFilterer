@@ -12,6 +12,7 @@ class TestFilterText(unittest.TestCase):
     test_files_dir = 'cases/input'
     expected_files_dir = 'cases/expected'
     result_files_dir = 'cases/output'
+    keep_results = True
 
     def setUp(self):
         # print(os.listdir("cases"))
@@ -29,7 +30,7 @@ class TestFilterText(unittest.TestCase):
             self.assertTrue(filecmp.cmp(r, e, shallow=False), r + " ≠ " + e)
 
     def tearDown(self):
-        if os.path.isdir(TestFilterText.result_files_dir):
+        if not self.keep_results and os.path.isdir(TestFilterText.result_files_dir):
             shutil.rmtree(TestFilterText.result_files_dir)
 
 
