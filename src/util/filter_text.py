@@ -27,7 +27,7 @@ class TextFilterer:
         '`': '`',
     }
 
-    DEFAULT_OPERATION_CHARS = r'[\^\+=<>≤≥*\/|]'
+    DEFAULT_OPERATION_CHARS = r'[\^\+=<>≤≥*|]'
     DEFAULT_OPERAND_CHARS = r'[_()\w]'
 
     def __init__(self, src, dst, sentence_delimiters=None, chars_to_remove: str=None,
@@ -101,7 +101,7 @@ class TextFilterer:
                 sentence += c  # keep delimiter in sentence
                 return sentence
 
-            if escape and (escape[-1], c) in escape_sequence_map:
+            if escape and escape[-1] in escape_sequence_map and c == escape_sequence_map[escape[-1]]:
                 escape.pop()
             elif c in escape_sequence_map.keys():
                 escape.append(c)
