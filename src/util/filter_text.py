@@ -27,8 +27,8 @@ class TextFilterer:
         '`': '`',
     }
 
-    DEFAULT_OPERATION_CHARS = r'\^\-+=<>≤≥*\/|'
-    DEFAULT_OPERAND_CHARS = string.ascii_letters + '_' + string.digits
+    DEFAULT_OPERATION_CHARS = r'[\^\+=<>≤≥*\/|]'
+    DEFAULT_OPERAND_CHARS = r'[_()\w]'
 
     def __init__(self, src, dst, sentence_delimiters=None, chars_to_remove: str=None,
                  remove_sentences_with_formulas=True, formula_operation_chars: str=None,
@@ -50,11 +50,11 @@ class TextFilterer:
                 formula_operation_chars = TextFilterer.DEFAULT_OPERATION_CHARS
             self.operation_chars = formula_operation_chars
 
-            self.formula_regexp_str = r'(?:\s*[{operand}]+\s*[{operation}])+\s*[{operand}]+'.format(
+            self.formula_regexp_str = r'(?:\s*{operand}+\s*{operation})+\s*{operand}+'.format(
                 operand=self.operand_chars,
                 operation=self.operation_chars)
 
-            self.formula_regexp = re.compile(self.formula_regexp_str)
+            self.formula_regexp = re.compile(self.formula_regexp_str, flags=re.UNICODE)
 
         self.sentence_contains_operation_chars = False
         self.eof = False
