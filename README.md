@@ -19,6 +19,7 @@ First, to be able to run it you need python 3.x installed. You may find how to d
 ```
 $ pdf2txt.py -h
 usage: filter_text.py [-h] [--sentence-delimiters [char [char ...]]]
+                      [--operation-chars [char [char ...]]]
                       [--keep-sentences-with-formulas]
                       [--skip-chars [char [char ...]]]
                       [src] [dst]
@@ -34,6 +35,9 @@ optional arguments:
   --sentence-delimiters [char [char ...]]
                         characters indicating sentence endings and beginnings.
                         By default: ".!?"
+  --operation-chars [char [char ...]]
+                        characters of which math operations consist. By
+                        default: +=*<>≤≥|^
   --keep-sentences-with-formulas
                         when specified does not filter sentences with
                         formulas.
