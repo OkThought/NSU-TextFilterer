@@ -50,5 +50,9 @@ optional arguments:
 
 `$ pdf2txt.py file.pdf | filter_text`
 
+## pdf2txt
+Also project contains an edited copy of pdf2txt.py command line util implemented in pdfminer.
+You can find how to use this here: https://www.unixuser.org/~euske/python/pdfminer/index.html#pdf2txt
+
 ## Contact
 The project was originally made for my teacher, Aigerim Bakieva, and I don't maintain it. But if you find it useful and want to have something added/fixed/changed, do not hezitate to write me a letter to my educational email: bogush@g.nsu.ru (Ivan Bogush).
