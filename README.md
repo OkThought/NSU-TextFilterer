@@ -8,7 +8,7 @@ Originally, its idea is to remove mathematical formulas from text. And as progra
 
 ## How to use?
 
-First, to be able to run it you need python 3.x installed. You may find how to do this here: wiki.python.org/moin/BeginnersGuide/Download
+First, to be able to run it you need python 3.x installed. You may find how to do this here: https://wiki.python.org/moin/BeginnersGuide/Download
 
 1. To filter setnences with formulas like `a+b=c` from file 'example.txt' and save the filtered text in file 'result.txt' all you need to do is:
 
