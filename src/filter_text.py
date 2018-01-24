@@ -7,7 +7,7 @@ from util.filter_text import TextFilterer
 
 DEFAULT_SENTENCE_DELIMITERS = '.!?'
 DEFAULT_SKIP_CHARS = r'#@$\\`'
-DEFAULT_OPERATION_CHARS = r'^+=<>≤≥*|'
+DEFAULT_OPERATION_CHARS = r'+=*<>≤≥|^'
 DEFAULT_OPERAND_CHARS = r'_()\w'
 
 
