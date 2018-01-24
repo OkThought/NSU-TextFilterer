@@ -1,7 +1,6 @@
 import os
 import re
 import shutil
-import string
 
 
 def create_temporary_copy(src):
@@ -27,32 +26,24 @@ class TextFilterer:
         '`': '`',
     }
 
-    DEFAULT_OPERATION_CHARS = r'[\^\+=<>≤≥*|]'
-    DEFAULT_OPERAND_CHARS = r'[_()\w]'
-
-    def __init__(self, src, dst, sentence_delimiters=None, chars_to_remove: str=None,
-                 remove_sentences_with_formulas=True, formula_operation_chars: str=None,
-                 formula_operand_chars: str=None):
+    def __init__(self, src, dst, sentence_delimiters, formula_operation_chars: str,
+                 formula_operand_chars: str, chars_to_remove: str=None,
+                 remove_sentences_with_formulas=True):
         self.reader = src
         self.writer = dst
-
-        self.sentence_delimiters = sentence_delimiters if sentence_delimiters else ['.']
+        self.sentence_delimiters = sentence_delimiters
         self.chars_to_remove = chars_to_remove
 
         self.filter_formulas = remove_sentences_with_formulas
         if remove_sentences_with_formulas:
 
-            if formula_operand_chars is None:
-                formula_operand_chars = TextFilterer.DEFAULT_OPERAND_CHARS
             self.operand_chars = formula_operand_chars
-
-            if formula_operation_chars is None:
-                formula_operation_chars = TextFilterer.DEFAULT_OPERATION_CHARS
             self.operation_chars = formula_operation_chars
 
-            self.formula_regexp_str = r'(?:\s*{operand}+\s*{operation})+\s*{operand}+'.format(
+            self.formula_regexp_str = r'(?:\s*[{operand}]+\s*[{operation}])+\s*[{operand}]+'.format(
                 operand=self.operand_chars,
-                operation=self.operation_chars)
+                operation=re.escape(self.operation_chars)
+            )
 
             self.formula_regexp = re.compile(self.formula_regexp_str, flags=re.UNICODE)
 

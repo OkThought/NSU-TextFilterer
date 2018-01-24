@@ -5,6 +5,11 @@ import os
 
 from util.filter_text import TextFilterer
 
+DEFAULT_SENTENCE_DELIMITERS = '.!?'
+DEFAULT_SKIP_CHARS = r'#@$\\`'
+DEFAULT_OPERATION_CHARS = r'^+=<>≤≥*|'
+DEFAULT_OPERAND_CHARS = r'_()\w'
+
 
 def main(args=None):
     import argparse
@@ -17,18 +22,20 @@ def main(args=None):
                    help='filtered file. By default stdout or "<src_file_path>-filtered.<src_file_extension>" if src is '
                         'specified.')
 
-    default_sentence_delimiters = '.!?'
-    p.add_argument('--sentence-delimiters', default=default_sentence_delimiters, nargs='*', metavar='char',
+    p.add_argument('--sentence-delimiters', default=DEFAULT_SENTENCE_DELIMITERS, nargs='*', metavar='char',
                    help='characters indicating sentence endings and beginnings. '
-                        'By default: "{}"'.format(default_sentence_delimiters))
+                        'By default: "{}"'.format(DEFAULT_SENTENCE_DELIMITERS))
+
+    p.add_argument('--operation-chars', default=DEFAULT_OPERATION_CHARS, nargs='*', metavar='char',
+                   help='characters of which math operations consist. '
+                        'By default: {}'.format(DEFAULT_OPERATION_CHARS))
 
     p.add_argument('--keep-sentences-with-formulas', default=False, action='store_true',
                    help='when specified does not filter sentences with formulas.')
 
-    default_skip_chars = r'#@$\\`'
-    p.add_argument('--skip-chars', default=default_skip_chars, nargs='*', metavar='char',
+    p.add_argument('--skip-chars', default=DEFAULT_SKIP_CHARS, nargs='*', metavar='char',
                    help='characters not written to dst. '
-                        'By default: "{}"'.format(default_skip_chars))
+                        'By default: "{}"'.format(DEFAULT_SKIP_CHARS))
 
     a = p.parse_args(args)
 
@@ -54,6 +61,8 @@ def main(args=None):
             src=src,
             dst=dst,
             sentence_delimiters=a.sentence_delimiters,
+            formula_operation_chars=a.operation_chars,
+            formula_operand_chars=DEFAULT_OPERAND_CHARS,
             remove_sentences_with_formulas=not a.keep_sentences_with_formulas,
             chars_to_remove=a.skip_chars)
         file_filterer.filter()
